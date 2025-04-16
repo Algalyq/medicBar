@@ -132,10 +132,6 @@ const TestimonialsPage = ({ language, translations }) => {
 
       {isMobile ? (
         <div className="reviews-slider" ref={sliderRef} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
-          <button className="slider-button prev" onClick={goToPrev}>
-            <FiChevronLeft />
-          </button>
-          
           <div className="slider-track" style={{
             transform: `translateX(-${currentIndex * 100}%)`
           }}>
@@ -157,9 +153,6 @@ const TestimonialsPage = ({ language, translations }) => {
             ))}
           </div>
           
-          <button className="slider-button next" onClick={goToNext}>
-            <FiChevronRight />
-          </button>
           
           <div className="slider-dots">
             {testimonials.map((_, index) => (

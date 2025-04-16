@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import { setLanguage, submitOrder, setSelectedService } from '../redux/actions/orderActions';
 import LanguageSelector from '../components/LanguageSelector';
 import OrderButton from '../components/OrderButton';
-import PhoneInput from '../components/PhoneInput';
 import { ConfirmationMessage } from '../components/ConfirmationMessage';
 import translations from '../utils/translations';
 import telegramService from '../services/telegramService';
@@ -19,31 +18,53 @@ const languages = [
 
 const services = [
   {
-    id: 'home',
-    name: 'Medic to Home',
-    description: {
-      kk: 'Біз дәрігерді сіздің орналасқан жеріңізге жібереміз.',
-      ru: 'Мы отправим врача к вам домой.',
+    id: 'food_poisoning',
+    image: 'https://diapazon.kz/images/2022/09/03/CvnpIEnFbI_a4_710x444.jpeg',
+    translations: {
+      en: { title: 'Food Poisoning', description: 'Treatment of food-related illnesses', price: '80$' },
+      kk: { title: 'Тамақ Улауы', description: 'Тамақпен байланысты аурулардың емдеуі.', price: '80$' },
+      ru: { title: 'Отравление Пищевое', description: 'Лечение заболеваний, связанных с пищей.', price: '80$' },
     },
   },
   {
-    id: 'online',
-    name: 'Online Medic',
-    description: {
-      kk: 'Дәрігермен бейне қоңырау арқылы кеңес алыңыз.',
-      ru: 'Проконсультируйтесь с врачом по видеосвязи.',
+    id: 'alcohol_poisoning',
+    image: 'https://onbso.ru/wp-content/uploads/2024/02/%D0%9E%D1%82%D1%80%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5-1300x650.jpg',
+    translations: {
+      en: { title: 'Alcohol Poisoning', description: 'Treatment of alcohol-related poisoning', price: '90$' },
+      kk: { title: 'Алкогольдік Улау', description: 'Алкогольмен байланысты улауды емдеу.', price: '90$' },
+      ru: { title: 'Отравление Алкогольное', description: 'Лечение алкогольного отравления.', price: '90$' },
+    },
+  },
+  {
+    id: 'iv_injections',
+    image: 'https://vrachnadom-spb.ru/images/podgotovka_k_ukolu.webp',
+    translations: {
+      en: { title: 'IV Injections', description: 'Professional IV injection services', price: '100$' },
+      kk: { title: 'Капельница, Инъекциялар, Барлық Түрлері', description: 'Кәсіби капельница және инъекция қызметтері.', price: '100$' },
+      ru: { title: 'Капельница, Уколы, Все Виды', description: 'Профессиональные услуги капельницы и инъекций.', price: '100$' },
+    },
+  },
+  {
+    id: 'dressings_enemas',
+    image: 'https://dobdocchel.ru/wp-content/uploads/2022/02/2-768x648.jpg',
+    translations: {
+      en: { title: 'Dressings and Enemas', description: 'Specialized care for dressings and cleansing', price: '85$' },
+      kk: { title: 'Бинттеу, Клизма, Асқазан Жуу', description: 'Бинттеу және тазалауға арналған мамандандырылған күтім.', price: '85$' },
+      ru: { title: 'Перевязки, Клизмы, Промывание Живота', description: 'Специализированный уход для перевязок и очищения.', price: '85$' },
     },
   },
 ];
 
 const HomeContainer = ({ language, setLanguage, submitOrder, selectedService, setSelectedService }) => {
   const [showLanguageSelector, setShowLanguageSelector] = useState(true);
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState('+7');
   const [name, setName] = useState('');
+  const [message, setMessage] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [phoneError, setPhoneError] = useState('');
-  const formRef = useRef(null); // Ref to scroll to form
+  const formRef = useRef(null);
+  const phoneInputRef = useRef(null);
 
   useEffect(() => {
     if (!language) setShowLanguageSelector(true);
@@ -55,91 +76,104 @@ const HomeContainer = ({ language, setLanguage, submitOrder, selectedService, se
   };
 
   const handleServiceSelect = (serviceId) => {
-    setSelectedService(serviceId);
+    const service = services.find((s) => s.id === serviceId);
+    if (service) {
+      const translation = service.translations[language] || service.translations['kk'];
+      setSelectedService(translation.title);
+    } else {
+      setSelectedService('Звандап біліп ал');
+    }
     setShowForm(true);
-    // Scroll to form smoothly
     setTimeout(() => {
       formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
   };
 
   const handleOrderClick = () => {
-    // if (!selectedService) {
-    //   alert(translations[language]?.selectServiceError || translations['en'].selectServiceError);
-    //   return;
-    // }
+    setSelectedService('Звандап біліп ал');
     setShowForm(true);
     setTimeout(() => {
       formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
   };
 
-  const formatPhoneNumber = (value) => {
-    // Remove all non-digits
-    const digits = value.replace(/\D/g, '');
-    let formatted = '';
+  const formatPhoneNumber = (digits) => {
+    // Remove non-digits and ensure it starts with '7'
+    const cleanDigits = digits.replace(/\D/g, '');
+    let formatted = '+7';
 
-    if (digits.startsWith('7')) {
-      formatted = '+7';
-      if (digits.length > 1) {
-        formatted += ' (' + digits.slice(1, Math.min(4, digits.length));
-      }
-      if (digits.length > 4) {
-        formatted += ') ' + digits.slice(4, Math.min(7, digits.length));
-      }
-      if (digits.length > 7) {
-        formatted += ' ' + digits.slice(7, Math.min(9, digits.length));
-      }
-      if (digits.length > 9) {
-        formatted += ' ' + digits.slice(9, Math.min(11, digits.length));
-      }
-    } else if (digits.length > 0) {
-      formatted = '+' + digits;
+    if (cleanDigits.length > 1) {
+      formatted += ' (' + cleanDigits.slice(1, Math.min(4, cleanDigits.length));
+    }
+    if (cleanDigits.length > 4) {
+      formatted += ') ' + cleanDigits.slice(4, Math.min(7, cleanDigits.length));
+    }
+    if (cleanDigits.length > 7) {
+      formatted += ' ' + cleanDigits.slice(7, Math.min(9, cleanDigits.length));
+    }
+    if (cleanDigits.length > 9) {
+      formatted += ' ' + cleanDigits.slice(9, Math.min(11, cleanDigits.length));
     }
 
     return formatted;
   };
 
-  const validatePhoneNumber = (value) => {
-    const digits = value.replace(/\D/g, '');
-    if (!digits.startsWith('7') || digits.length !== 11) {
-      return translations[language]?.phoneError || 'Please enter a valid phone number in the format +7 (***) *** ** **';
-    }
-    return '';
-  };
-
   const handlePhoneChange = (e) => {
     const input = e.target.value;
-    const formatted = formatPhoneNumber(input);
+    const selectionStart = e.target.selectionStart;
+    let digits = input.replace(/\D/g, '');
+
+    // Always enforce starting with '7'
+    if (digits.length === 0 || !digits.startsWith('7')) {
+      digits = '7' + digits;
+    }
+
+    // Limit to 11 digits (including leading 7)
+    if (digits.length > 11) {
+      digits = digits.slice(0, 11);
+    }
+
+    const formatted = formatPhoneNumber(digits);
     setPhone(formatted);
-    setPhoneError(validatePhoneNumber(formatted));
+    setPhoneError('');
+
+    // Adjust cursor position
+    setTimeout(() => {
+      const newPosition = Math.min(selectionStart + (formatted.length - input.length), formatted.length);
+      phoneInputRef.current.setSelectionRange(newPosition, newPosition);
+    }, 0);
   };
 
   const handleNameChange = (e) => {
     setName(e.target.value);
   };
 
-  const handleSubmit = () => {
-    const phoneValidationError = validatePhoneNumber(phone);
+  const handleSubmit = async () => {
     if (!name) {
       alert(translations[language]?.nameError || 'Please enter your name');
       return;
     }
-    if (phoneValidationError || !phone) {
-      alert(phoneValidationError || translations[language]?.phoneError || 'Please enter a valid phone number');
+    if (!phone) {
+      alert(translations[language]?.phoneError || 'Please enter a valid phone number');
       return;
     }
-    // if (!selectedService) {
-    //   alert(translations[language]?.selectServiceError || translations['en'].selectServiceError);
-    //   return;
-    // }
 
-    submitOrder({ name, phone, language, service: selectedService });
-    telegramService.sendOrder({ name, phone, language, service: selectedService });
-    setShowForm(false);
-    setSelectedService(null);
-    setName(name);
-    setPhone(phone);
+    try {
+      submitOrder({ name, phone, language, service: selectedService });
+      console.log(phone, name)
+      setMessage(t.confirmation.replace('[phone]', phone).replace('[name]', name))
+
+      await telegramService.sendOrder({ name, phone, language, service: selectedService });
+      
+      setShowForm(false);
+      setShowConfirmation(true);
+      setSelectedService(null);
+      setName('');
+      setPhone('+7');
+    } catch (error) {
+      alert(t.orderError || 'Failed to submit order. Please try again.');
+      console.error('Order submission failed:', error);
+    }
   };
 
   const t = translations[language] || translations['kk'];
@@ -150,15 +184,15 @@ const HomeContainer = ({ language, setLanguage, submitOrder, selectedService, se
 
   return (
     <>
-      <MedicalServicesPage 
-        onServiceSelect={handleServiceSelect} 
-        services={services} 
-        language={language} 
-        translations={translations} 
+      <MedicalServicesPage
+        onServiceSelect={handleServiceSelect}
+        services={services}
+        language={language}
+        translations={translations}
       />
-      <TestimonialsPage 
-        language={language} 
-        translations={translations} 
+      <TestimonialsPage
+        language={language}
+        translations={translations}
       />
       {!showForm && !showConfirmation && (
         <OrderButton onClick={handleOrderClick} label={t.orderNow} />
@@ -183,10 +217,13 @@ const HomeContainer = ({ language, setLanguage, submitOrder, selectedService, se
             <input
               type="tel"
               id="phone"
+              ref={phoneInputRef}
               value={phone}
-              onChange={handlePhoneChange}
-              placeholder={t.phonePlaceholder || '+7 (***) *** ** **'}
+              onInput={handlePhoneChange}
+              placeholder="+7 (XXX) XXX XX XX"
               className={`form-input ${phoneError ? 'error' : ''}`}
+              pattern="[0-9]*"
+              inputMode="numeric"
             />
             {phoneError && <span className="error-message">{phoneError}</span>}
           </div>
@@ -195,8 +232,8 @@ const HomeContainer = ({ language, setLanguage, submitOrder, selectedService, se
       )}
 
       {showConfirmation && (
-        <ConfirmationMessage 
-          message={t.confirmation.replace('[phone]', phone).replace('[name]', name)}
+        <ConfirmationMessage
+          message={message}
           onClose={() => setShowConfirmation(false)}
         />
       )}

@@ -91,9 +91,9 @@
 }
 
 .slider-dots .dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+  width: 8px;
+  height: 4px;
+  /* border-radius: 50%; */
   border: none;
   background-color: #ddd;
   margin: 0 5px;

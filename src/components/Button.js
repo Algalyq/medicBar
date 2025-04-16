@@ -6,7 +6,8 @@ export const Button = styled.button`
   border: none;
   border-radius: 8px;
   padding: 12px 24px;
-  font-weight: 500;
+  font-weight: bold;
+  font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s;
   display: inline-flex;

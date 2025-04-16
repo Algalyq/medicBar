@@ -3,6 +3,7 @@ import { ServiceCard, ServicePrice, ServiceImage } from '../components/ServiceCa
 import { Button } from '../components/Button';
 import styled from 'styled-components';
 import defaultTranslations from '../utils/defaultTranslations';
+import { FaPhone, FaWhatsapp } from 'react-icons/fa';
 
 const MedicalServicesPage = ({ onServiceSelect, services, language, translations }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -64,27 +65,6 @@ const MedicalServicesPage = ({ onServiceSelect, services, language, translations
         }
       }
     },
-    // {
-    //   id: 'intestinal_poisoning',
-    //   image: 'https://example.com/intestinal-poisoning.jpg',
-    //   translations: {
-    //     en: {
-    //       title: 'Intestinal Poisoning',
-    //       description: 'Treatment of intestinal problems',
-    //       price: '75$'
-    //     },
-    //     kk: {
-    //       title: 'Ішек Улауы',
-    //       description: 'Ішек проблемаларын емдеу.',
-    //       price: '75$'
-    //     },
-    //     ru: {
-    //       title: 'Кишечные Отравления',
-    //       description: 'Лечение кишечных проблем.',
-    //       price: '75$'
-    //     }
-    //   }
-    // },
     {
       id: 'iv_injections',
       image: 'https://vrachnadom-spb.ru/images/podgotovka_k_ukolu.webp',
@@ -133,6 +113,7 @@ const MedicalServicesPage = ({ onServiceSelect, services, language, translations
     onServiceSelect('online'); // Trigger form display in parent
   };
 
+
   const handleTouchStart = (e) => {
     setTouchStart(e.targetTouches[0].clientX);
   };
@@ -159,6 +140,15 @@ const MedicalServicesPage = ({ onServiceSelect, services, language, translations
     setCurrentIndex(index);
   };
 
+
+  const handlePhoneClick = () => {
+    window.location.href = 'tel:+77029973997';
+  };
+
+  const handleWhatsAppClick = () => {
+    window.open('https://wa.me/77755805630', '_blank');
+  };
+
   const HeroSection = styled.div`
     background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
                 url('https://images.unsplash.com/photo-1576091160550-2173dba999ef') center/cover;
@@ -166,6 +156,7 @@ const MedicalServicesPage = ({ onServiceSelect, services, language, translations
     padding: 80px 20px;
     text-align: center;
     margin-bottom: 40px;
+    position: relative;
 
     h1 {
       font-size: 2.5rem;
@@ -173,9 +164,59 @@ const MedicalServicesPage = ({ onServiceSelect, services, language, translations
       text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
     }
 
+    .contact-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .contact-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      color: white;
+      text-decoration: none;
+    }
+
+    .phone-button {
+      background-color: #4CAF50;
+      &:hover {
+        background-color: #3e8e41;
+        transform: translateY(-2px);
+      }
+    }
+
+    .whatsapp-button {
+      background-color: #4CAF50;
+      &:hover {
+        background-color: #3e8e41;
+        transform: translateY(-2px);
+      }
+    }
+
     @media (max-width: 768px) {
       padding: 60px 15px;
       h1 { font-size: 2rem; }
+
+      .contact-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .contact-button {
+        width: 100%;
+        max-width: 250px;
+        justify-content: center;
+      }
     }
   `;
 
@@ -206,6 +247,23 @@ const MedicalServicesPage = ({ onServiceSelect, services, language, translations
         <Button onClick={handleOnlineConsultationClick}>
           {t.services?.bookConsultation || defaultTranslations.services.bookConsultation[language] || defaultTranslations.services.bookConsultation.en}
         </Button>
+        
+        <div className="contact-buttons">
+          <button 
+            className="contact-button phone-button" 
+            onClick={handlePhoneClick}
+            aria-label="Call us"
+          >
+            <FaPhone size={16} /> {t.services?.phoneCall || defaultTranslations.services.phoneCall[language] }
+          </button>
+          <button 
+            className="contact-button whatsapp-button" 
+            onClick={handleWhatsAppClick}
+            aria-label="Contact us on WhatsApp"
+          >
+            <FaWhatsapp size={16}/> {t.services?.whatsappCall || defaultTranslations.services.whatsappCall[language]}
+          </button>
+        </div>
       </HeroSection>
 
       <ServicesGrid>
